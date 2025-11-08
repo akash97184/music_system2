@@ -75,13 +75,11 @@ music_sys/
 3. **Add Songs**: Click "Add New Song" to add songs to your collection
 4. **Manage Songs**: Edit or delete songs from your collection
 5. **Search & Filter**: Use the search bar and filters to find specific songs
-6. **Play**: Click the play button to simulate playing a song
 
 ## Notes
 
 - Data is stored in browser localStorage for demo purposes
 - In a production environment, you would connect to a backend API
-- The play functionality is simulated (no actual audio playback)
 
 ## License
 
