@@ -24,6 +24,7 @@ import {
   DialogActions,
   Paper,
   Tooltip,
+  Alert,
 } from '@mui/material';
 import {
   Add,
@@ -54,6 +55,7 @@ export default function SongsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [songToDelete, setSongToDelete] = useState<Song | null>(null);
   const [playingSong, setPlayingSong] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -107,13 +109,19 @@ export default function SongsPage() {
   const handleDelete = (song: Song) => {
     setSongToDelete(song);
     setDeleteDialogOpen(true);
+    setDeleteError('');
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (songToDelete) {
-      dispatch(deleteSong(songToDelete.id));
-      setDeleteDialogOpen(false);
-      setSongToDelete(null);
+      try {
+        await dispatch(deleteSong(songToDelete.id)).unwrap();
+        setDeleteDialogOpen(false);
+        setSongToDelete(null);
+        setDeleteError('');
+      } catch (err: any) {
+        setDeleteError(err.message || 'Failed to delete song. Please try again.');
+      }
     }
   };
 
@@ -379,7 +387,7 @@ export default function SongsPage() {
                       </Typography>
 
                       <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 2 }}>
-                        <Tooltip title="Play">
+                        {/* <Tooltip title="Play">
                           <IconButton
                             onClick={() => handlePlay(song.id)}
                             sx={{
@@ -395,7 +403,7 @@ export default function SongsPage() {
                           >
                             <PlayArrow />
                           </IconButton>
-                        </Tooltip>
+                        </Tooltip> */}
                         
                         <Link href={`/songs/edit/${song.id}`} style={{ textDecoration: 'none' }}>
                           <Tooltip title="Edit">
@@ -441,20 +449,35 @@ export default function SongsPage() {
         {/* Delete Confirmation Dialog */}
         <Dialog
           open={deleteDialogOpen}
-          onClose={() => setDeleteDialogOpen(false)}
+          onClose={() => {
+            setDeleteDialogOpen(false);
+            setDeleteError('');
+          }}
           PaperProps={{
             sx: { borderRadius: '16px' },
           }}
         >
           <DialogTitle>Delete Song</DialogTitle>
           <DialogContent>
+            {deleteError && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>
+                {deleteError}
+              </Alert>
+            )}
             <DialogContentText>
               Are you sure you want to delete &quot;{songToDelete?.title}&quot; by {songToDelete?.singer}?
               This action cannot be undone.
             </DialogContentText>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setDeleteError('');
+              }}
+            >
+              Cancel
+            </Button>
             <Button
               onClick={confirmDelete}
               variant="contained"
